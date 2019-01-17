@@ -1,0 +1,34 @@
+version: '2'
+services:
+  mysql:
+    build: ./mysql
+    env_file:
+      - ./mysql/envfile.txt
+    ports:
+     - 3306:3306
+    volumes:
+      - ./mysql/mounted/backups/:/adk/backups
+      - ./mysql/mounted/logs:/var/log/mysql
+    container_name: mysql5
+  web:
+    build: ./web
+    container_name: web
+    volumes:
+      - ./web/src:/var/www/html/
+      - ./storage/app:/var/www/html/storage/app
+      - ./storage/logs:/var/www/html/storage/logs
+      - ./web/config:/etc/apache2/sites-available
+    depends_on:
+      - mysql
+    ports:
+     - 8000:80
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+     - 8080:80
+    volumes:
+     - /sessions
+    environment:
+      PMA_HOST: mysql
+    container_name: phpmyadmin
